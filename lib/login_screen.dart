@@ -11,14 +11,27 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  String role = 'student';
+  bool _obscurePassword = true;
+  bool isLoading = false;
 
   void login() async {
-    var response = await ApiService.login(emailController.text, passwordController.text);
+    if (!_formKey.currentState!.validate()) return;
 
-    print("Login Response: $response"); // Debugging Response
+    setState(() {
+      isLoading = true;
+    });
+
+    final response = await ApiService.login(
+      emailController.text,
+      passwordController.text,
+    );
+
+    setState(() {
+      isLoading = false;
+    });
 
     if (response != null && response.containsKey("message")) {
       Navigator.pushReplacement(
@@ -34,49 +47,154 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  InputDecoration _buildInputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(color: Colors.grey),
+      filled: true,
+      fillColor: const Color(0xFF2F3136),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(6.0),
+        borderSide: BorderSide.none,
+      ),
+      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: Center( // Center the content
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView( // Ensures content is scrollable if needed
+      backgroundColor: const Color(0xFF36393F),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Form(
+            key: _formKey,
             child: Column(
-              mainAxisSize: MainAxisSize.min, // Centers vertically within available space
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                TextField(
+                const Text(
+                  'Welcome back!',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "We're so excited to see you again!",
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+
+                // Email Field
+                TextFormField(
                   controller: emailController,
-                  decoration: const InputDecoration(labelText: 'Email'),
+                  enabled: !isLoading,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: _buildInputDecoration("Email"),
+                  style: const TextStyle(color: Colors.white),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    return null;
+                  },
                 ),
-                TextField(
+                const SizedBox(height: 20),
+
+                // Password Field
+                TextFormField(
                   controller: passwordController,
-                  decoration: const InputDecoration(labelText: 'Password'),
-                  obscureText: true,
-                ),
-                DropdownButton<String>(
-                  value: role,
-                  items: ['student', 'admin'].map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  onChanged: (newValue) {
-                    setState(() {
-                      role = newValue!;
-                    });
+                  obscureText: _obscurePassword,
+                  enabled: !isLoading,
+                  decoration: _buildInputDecoration("Password").copyWith(
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.grey[400],
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
+                  ),
+                  style: const TextStyle(color: Colors.white),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your password';
+                    }
+                    return null;
                   },
                 ),
-                ElevatedButton(onPressed: login, child: const Text('Login')),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const RegisterScreen()),
-                    );
-                  },
-                  child: const Text("Don't have an account? Register"),
+                const SizedBox(height: 30),
+
+                // Login Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : login,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      disabledBackgroundColor: Colors.grey[800],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6.0),
+                      ),
+                    ),
+                    child: isLoading
+                        ? const CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    )
+                        : const Text(
+                      'Login',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Register Link
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Need an account? ",
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 14,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                        );
+                      },
+                      child: const Text(
+                        'Register',
+                        style: TextStyle(
+                          color: Color(0xFF00AFF4),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

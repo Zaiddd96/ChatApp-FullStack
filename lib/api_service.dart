@@ -6,9 +6,9 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 
 class ApiService {
-  static const String baseUrl = "http://khage0iisu.ap.loclx.io";
+  static const String baseUrl = "https://oyofstajzq.ap.loclx.io";
 
-  // Store the logged-in user's ID
+  // Store the logged-in user's ID and Name
   static int? currentUserId;
 
   // ✅ Save User ID to SharedPreferences
@@ -187,7 +187,7 @@ class ApiService {
   }
 
   // websocket functionalities
-  static const String webSocketBaseUrl = "wss://khage0iisu.ap.loclx.io";
+  static const String webSocketBaseUrl = "ws://oyofstajzq.ap.loclx.io";
   static WebSocketChannel? _channel;
 
   static void connectToChat(int roomId, int userId, Function(dynamic) onMessageReceived) {

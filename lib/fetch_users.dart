@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'api_service.dart'; // Ensure this contains API calls
-import 'chat_screen.dart'; // Ensure this exists
+import 'api_service.dart';
+import 'chat_screen.dart';
 
 class SelectUserScreen extends StatefulWidget {
   const SelectUserScreen({super.key});
@@ -38,7 +38,7 @@ class _SelectUserScreenState extends State<SelectUserScreen> {
       Uri.parse('${ApiService.baseUrl}/create-room'),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
-        "room_name": "private_${currentUserId}_${selectedUserId}",
+        "room_name": "private_${currentUserId}_${selectedUserName}",
         "user_ids": userIds
       }),
     );
@@ -51,7 +51,7 @@ class _SelectUserScreenState extends State<SelectUserScreen> {
           builder: (context) => ChatScreen(
             roomId: responseData["room_id"],
             username: selectedUserName,
-            userId: ApiService.currentUserId!, // ✅ Add userId here
+            userId: ApiService.currentUserId!,
           ),
         ),
       );
@@ -69,16 +69,40 @@ class _SelectUserScreenState extends State<SelectUserScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Select a User')),
-      body: users.isEmpty
-          ? const Center(child: Text('No users found'))
+      backgroundColor: const Color(0xFF36393F),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF2F3136),
+        title: const Text('Select a User', style: TextStyle(color: Colors.white)),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator(color: Colors.white))
+          : users.isEmpty
+          ? const Center(
+        child: Text('No users found', style: TextStyle(color: Colors.white70)),
+      )
           : ListView.separated(
         itemCount: users.length,
-        separatorBuilder: (context, index) => const Divider(thickness: 0.5, height: 1),
+        separatorBuilder: (context, index) => const Divider(
+          color: Colors.white12,
+          height: 1,
+          thickness: 0.5,
+        ),
         itemBuilder: (context, index) {
           final user = users[index];
           return ListTile(
-            title: Text(user['name']),
+            leading: Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFF4F545C),
+                shape: BoxShape.circle,
+              ),
+              padding: const EdgeInsets.all(10),
+              child: const Icon(Icons.person, color: Colors.white),
+            ),
+            title: Text(
+              user['name'],
+              style: const TextStyle(color: Colors.white),
+            ),
             onTap: () {
               int? selectedUserId = int.tryParse(user['id'].toString());
               if (selectedUserId == null) return;

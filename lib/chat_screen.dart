@@ -40,7 +40,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void connectWebSocket() {
-    channel = IOWebSocketChannel.connect("ws://your-backend-url/ws/${widget.roomId}/${widget.userId}");
+    channel = IOWebSocketChannel.connect("ws://oyofstajzq.ap.loclx.io/ws/${widget.roomId}/${widget.userId}");
 
     channel.stream.listen((data) {
       setState(() {
@@ -81,14 +81,19 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.username)),
+      backgroundColor: const Color(0xFF36393F),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF2F3136),
+        title: Text(widget.username, style: const TextStyle(color: Colors.white)),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: Column(
         children: [
           Expanded(
             child: isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator(color: Colors.white))
                 : messages.isEmpty
-                ? const Center(child: Text("No messages yet"))
+                ? const Center(child: Text("No messages yet", style: TextStyle(color: Colors.white70)))
                 : ListView.builder(
               itemCount: messages.length,
               itemBuilder: (context, index) {
@@ -98,32 +103,47 @@ class _ChatScreenState extends State<ChatScreen> {
                   alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isMe ? Colors.blue : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(10),
+                      color: isMe ? const Color(0xFF5865F2) : const Color(0xFF4F545C),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(msg["content"], style: TextStyle(color: isMe ? Colors.white : Colors.black)),
+                    child: Text(
+                      msg["content"],
+                      style: TextStyle(
+                        color: isMe ? Colors.white : Colors.white70,
+                      ),
+                    ),
                   ),
                 );
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            color: const Color(0xFF2F3136),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: messageController,
-                    decoration: const InputDecoration(
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
                       hintText: "Type a message...",
-                      border: OutlineInputBorder(),
+                      hintStyle: const TextStyle(color: Colors.white54),
+                      filled: true,
+                      fillColor: const Color(0xFF40444B),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 IconButton(
-                  icon: const Icon(Icons.send, color: Colors.blue),
+                  icon: const Icon(Icons.send, color: Color(0xFF5865F2)),
                   onPressed: sendMessage,
                 ),
               ],

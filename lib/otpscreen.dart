@@ -13,6 +13,9 @@ class OTPScreen extends StatefulWidget {
 
 class _OTPScreenState extends State<OTPScreen> {
   final TextEditingController otpController = TextEditingController();
+  final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
+  final List<TextEditingController> _otpFields =
+  List.generate(4, (_) => TextEditingController());
   bool isLoading = false;
   bool isResendDisabled = true;
   int countdown = 60;
@@ -49,7 +52,7 @@ class _OTPScreenState extends State<OTPScreen> {
       isLoading = true;
     });
 
-    String otp = otpController.text.trim();
+    String otp = _otpFields.map((e) => e.text).join();
 
     if (otp.isEmpty || otp.length != 4) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -61,11 +64,15 @@ class _OTPScreenState extends State<OTPScreen> {
       return;
     }
 
+    otpController.text = otp; // update controller for backend use
+
     var response = await ApiService.verifyOTP(widget.email, otp);
 
     print("OTP Verification Response: $response");
 
-    if (response != null && response.containsKey('role') && response.containsKey('access_token')) {
+    if (response != null &&
+        response.containsKey('role') &&
+        response.containsKey('access_token')) {
       String userRole = response['role'];
 
       if (userRole == 'admin') {
@@ -102,45 +109,103 @@ class _OTPScreenState extends State<OTPScreen> {
     startResendCountdown();
   }
 
+  Widget buildOTPField(int index) {
+    return SizedBox(
+      width: 55,
+      child: TextField(
+        controller: _otpFields[index],
+        focusNode: _focusNodes[index],
+        keyboardType: TextInputType.number,
+        textAlign: TextAlign.center,
+        maxLength: 1,
+        style: const TextStyle(color: Colors.white, fontSize: 20),
+        cursorColor: Colors.white,
+        decoration: InputDecoration(
+          counterText: '',
+          filled: true,
+          fillColor: const Color(0xFF2F3136),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        onChanged: (value) {
+          if (value.isNotEmpty) {
+            if (index < 3) {
+              FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
+            } else {
+              FocusScope.of(context).unfocus();
+            }
+          } else if (index > 0) {
+            FocusScope.of(context).requestFocus(_focusNodes[index - 1]);
+          }
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Enter OTP')),
+      backgroundColor: const Color(0xFF36393F),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF2F3136),
+        title: const Text('Enter OTP', style: TextStyle(color: Colors.white)),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
               'An OTP has been sent to your email. Please enter it below.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: 16, color: Colors.white),
             ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: otpController,
-              keyboardType: TextInputType.number,
-              maxLength: 4,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 20, letterSpacing: 8),
-              decoration: InputDecoration(
-                labelText: 'Enter OTP',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            const SizedBox(height: 30),
+
+            // OTP Fields Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(4, (index) => buildOTPField(index)),
+            ),
+            const SizedBox(height: 30),
+
+            // Verify Button
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: isLoading ? null : verifyOTP,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6.0),
+                  ),
+                ),
+                child: isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                  'Verify OTP',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: isLoading ? null : verifyOTP,
-              child: isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Verify OTP'),
-            ),
-            const SizedBox(height: 20),
+
+            // Resend Button
             TextButton(
               onPressed: isResendDisabled ? null : resendOTP,
-              child: Text(isResendDisabled
-                  ? 'Resend OTP in $countdown seconds'
-                  : 'Resend OTP'),
+              child: Text(
+                isResendDisabled
+                    ? 'Resend OTP in $countdown seconds'
+                    : 'Resend OTP',
+                style: const TextStyle(color: Color(0xFF00AFF4)),
+              ),
             ),
           ],
         ),
