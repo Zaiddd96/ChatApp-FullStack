@@ -62,7 +62,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF36393F),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF2F3136),
+        backgroundColor: const Color(0xFF1E1F22),
         title: const Text(
           'Register',
           style: TextStyle(color: Colors.white),

@@ -6,9 +6,9 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 
 class ApiService {
-  static const String baseUrl = "https://oyofstajzq.ap.loclx.io";
+  static const String baseUrl = "https://tr8lhmndjg.ap.loclx.io";
 
-  // Store the logged-in user's ID and Name
+  // Store the logged-in user's ID
   static int? currentUserId;
 
   // ✅ Save User ID to SharedPreferences
@@ -37,6 +37,26 @@ class ApiService {
       return jsonDecode(response.body);
     } else {
       throw Exception("Failed to load rooms");
+    }
+  }
+
+  static Future<Map<String, dynamic>> createRoom({
+    required List<int> userIds,
+    required String roomName,
+  }) async {
+    final url = Uri.parse('$baseUrl/create-room');
+    final headers = {"Content-Type": "application/json"};
+    final body = jsonEncode({
+      "user_ids": userIds,
+      "room_name": roomName,
+    });
+
+    final response = await http.post(url, headers: headers, body: body);
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to create room: ${response.body}');
     }
   }
 
@@ -186,8 +206,52 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
+  // update password functionality
+  static Future<Map<String, dynamic>> sendResetOtp(String email) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/send-reset-otp'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"email": email}),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to send reset OTP");
+    }
+  }
+
+  static Future<Map<String, dynamic>> verifyResetOtp(String email, String otp) async {
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/verify-reset-otp'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"email": email, "otp": otp}),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Invalid OTP");
+    }
+  }
+
+  static Future<Map<String, dynamic>> resetPassword(String email, String newPassword) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/reset-password'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"email": email, "new_password": newPassword}),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Password reset failed.");
+    }
+  }
+
   // websocket functionalities
-  static const String webSocketBaseUrl = "ws://oyofstajzq.ap.loclx.io";
+  static const String webSocketBaseUrl = "ws://tr8lhmndjg.ap.loclx.io";
   static WebSocketChannel? _channel;
 
   static void connectToChat(int roomId, int userId, Function(dynamic) onMessageReceived) {

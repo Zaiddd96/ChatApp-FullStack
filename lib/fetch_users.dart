@@ -71,7 +71,7 @@ class _SelectUserScreenState extends State<SelectUserScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF36393F),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF2F3136),
+        backgroundColor: const Color(0xFF1E1F22),
         title: const Text('Select a User', style: TextStyle(color: Colors.white)),
         iconTheme: const IconThemeData(color: Colors.white),
       ),

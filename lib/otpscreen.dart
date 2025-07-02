@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:student_registration/api_service.dart';
+import 'reset_password_screen.dart';
 import 'chats.dart';
 
 class OTPScreen extends StatefulWidget {
   final String email;
-  const OTPScreen({super.key, required this.email});
+  final bool isPasswordResetFlow;
+
+  const OTPScreen({
+    super.key,
+    required this.email,
+    this.isPasswordResetFlow = false,
+  });
 
   @override
   _OTPScreenState createState() => _OTPScreenState();
@@ -48,9 +55,7 @@ class _OTPScreenState extends State<OTPScreen> {
   }
 
   void verifyOTP() async {
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
 
     String otp = _otpFields.map((e) => e.text).join();
 
@@ -58,55 +63,80 @@ class _OTPScreenState extends State<OTPScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a valid 4-digit OTP')),
       );
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
       return;
     }
 
-    otpController.text = otp; // update controller for backend use
+    otpController.text = otp;
 
-    var response = await ApiService.verifyOTP(widget.email, otp);
+    try {
+      if (widget.isPasswordResetFlow) {
+        var response = await ApiService.verifyResetOtp(widget.email, otp);
+        print("🔐 Reset OTP Verification Response: $response");
 
-    print("OTP Verification Response: $response");
-
-    if (response != null &&
-        response.containsKey('role') &&
-        response.containsKey('access_token')) {
-      String userRole = response['role'];
-
-      if (userRole == 'admin') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const UsersScreen()),
-        );
-      } else if (userRole == 'student') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const UsersScreen()),
-        );
+        if (response["message"] == "OTP Verified") {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ResetPasswordScreen(email: widget.email),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Invalid OTP, please try again')),
+          );
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid role received')),
-        );
+        var response = await ApiService.verifyOTP(widget.email, otp);
+        print("OTP Verification Response: $response");
+
+        if (response != null &&
+            response.containsKey('role') &&
+            response.containsKey('access_token')) {
+          String userRole = response['role'];
+
+          if (userRole == 'admin' || userRole == 'student') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const UsersScreen()),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Invalid role received')),
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Invalid OTP, please try again')),
+          );
+        }
       }
-    } else {
+    } catch (e) {
+      print("OTP Error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid OTP, please try again')),
+        const SnackBar(content: Text('OTP verification failed')),
       );
     }
 
-    setState(() {
-      isLoading = false;
-    });
+    setState(() => isLoading = false);
   }
 
   void resendOTP() async {
-    await ApiService.sendOTP(widget.email);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('New OTP sent to your email')),
-    );
-    startResendCountdown();
+    try {
+      if (widget.isPasswordResetFlow) {
+        await ApiService.sendResetOtp(widget.email);
+      } else {
+        await ApiService.sendOTP(widget.email);
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('New OTP sent to your email')),
+      );
+      startResendCountdown();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to resend OTP: $e')),
+      );
+    }
   }
 
   Widget buildOTPField(int index) {
@@ -150,7 +180,7 @@ class _OTPScreenState extends State<OTPScreen> {
       backgroundColor: const Color(0xFF36393F),
       appBar: AppBar(
         backgroundColor: const Color(0xFF2F3136),
-        title: const Text('Enter OTP', style: TextStyle(color: Colors.white)),
+        title: const Text('OTP verification', style: TextStyle(color: Colors.white)),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Padding(

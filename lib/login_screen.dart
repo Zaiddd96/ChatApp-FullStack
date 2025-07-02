@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:student_registration/api_service.dart';
 import 'package:student_registration/register_screen.dart';
+import 'forgot_password_screen.dart';
 import 'otpscreen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -73,11 +74,13 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // Icon(Icons.messenger, size: 130),
+                // SizedBox(height: 15,),
                 const Text(
                   'Welcome back!',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 24,
+                    fontSize: 26,
                     color: Colors.white,
                   ),
                 ),
@@ -134,7 +137,32 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 30),
+
+                const SizedBox(height: 10),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const ForgetPasswordScreen()),
+                        );
+                      },
+                      child: const Text(
+                        ' Forgot Password?',
+                        style: TextStyle(
+                          color: Color(0xFF00AFF4),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 13
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
 
                 // Login Button
                 SizedBox(
