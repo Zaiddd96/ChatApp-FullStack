@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:student_registration/create_group_screen.dart';
-import 'api_service.dart';
+import 'package:intl/intl.dart';
+import 'package:student_registration/chat/screens/create_group_screen.dart';
+import '../../services/api_service.dart';
 import 'chat_screen.dart';
 import 'fetch_users.dart';
 
@@ -18,6 +19,7 @@ class _UsersScreenState extends State<UsersScreen> {
   Future<void> fetchRooms() async {
     setState(() => isLoading = true);
     try {
+      await ApiService.loadUserId();
       List<dynamic> fetchedRooms = await ApiService.getUserRooms();
       setState(() {
         rooms = fetchedRooms;
@@ -80,6 +82,20 @@ class _UsersScreenState extends State<UsersScreen> {
               title: Text(
                 room['room_name'],
                 style: const TextStyle(color: Colors.white),
+              ),
+              subtitle: Text(
+                room['last_sender_id'] == ApiService.currentUserId
+                    ? 'You: ${room['last_message']}'
+                    : room['last_message'] ?? '',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Colors.white70),
+              ),
+              trailing: Text(
+                room['last_timestamp'] != null
+                    ? DateFormat('hh:mm a').format(DateTime.parse(room['last_timestamp']))
+                    : '',
+                style: const TextStyle(color: Colors.white54, fontSize: 12),
               ),
               onTap: () {
                 Navigator.push(

@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'api_service.dart';
+import '../../services/api_service.dart';
 import 'chat_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class SelectUserScreen extends StatefulWidget {
   const SelectUserScreen({super.key});
@@ -33,12 +35,14 @@ class _SelectUserScreenState extends State<SelectUserScreen> {
     await ApiService.loadUserId();
     int currentUserId = ApiService.currentUserId!;
     List<int> userIds = [currentUserId, selectedUserId];
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? currentUsername = prefs.getString("username");
 
     final response = await http.post(
       Uri.parse('${ApiService.baseUrl}/create-room'),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
-        "room_name": "private_${currentUserId}_${selectedUserName}",
+        "room_name": "${currentUsername}-${selectedUserName}",
         "user_ids": userIds
       }),
     );

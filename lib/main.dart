@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:student_registration/login_screen.dart';
+import 'package:student_registration/auth/screens/auth_gate.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Auth App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const LoginScreen(),
+      home: const AuthGate(),
     );
   }
 }

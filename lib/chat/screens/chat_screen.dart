@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/io.dart';
-import 'api_service.dart';
+import '../../services/api_service.dart';
 import 'package:intl/intl.dart';
 
 
@@ -58,7 +58,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void connectWebSocket() {
-    channel = IOWebSocketChannel.connect("ws://tr8lhmndjg.ap.loclx.io/ws/${widget.roomId}/${widget.userId}");
+    channel = IOWebSocketChannel.connect("ws://chatapp-backend-x4uo.onrender.com/ws/${widget.roomId}/${widget.userId}");
 
     channel.stream.listen((data) {
       final decoded = jsonDecode(data);
@@ -72,7 +72,7 @@ class _ChatScreenState extends State<ChatScreen> {
         });
         scrollToBottom();
       } else {
-        print("⚠️ Skipped invalid or incomplete message: $decoded");
+        print("⚠️Skipped invalid or incomplete message: $decoded");
       }
     });
   }

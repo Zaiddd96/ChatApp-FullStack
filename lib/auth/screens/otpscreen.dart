@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:student_registration/api_service.dart';
+import 'package:student_registration/services/api_service.dart';
 import 'reset_password_screen.dart';
-import 'chats.dart';
+import '../../chat/screens/chats.dart';
 
 class OTPScreen extends StatefulWidget {
   final String email;

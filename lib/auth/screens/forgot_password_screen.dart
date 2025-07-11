@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:student_registration/api_service.dart';
-import 'package:student_registration/otpscreen.dart';
+import 'package:student_registration/services/api_service.dart';
+import 'package:student_registration/auth/screens/otpscreen.dart';
 
 class ForgetPasswordScreen extends StatefulWidget {
   const ForgetPasswordScreen({super.key});

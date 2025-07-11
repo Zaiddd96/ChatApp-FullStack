@@ -6,7 +6,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 
 class ApiService {
-  static const String baseUrl = "https://tr8lhmndjg.ap.loclx.io";
+  static const String baseUrl = "https://chatapp-backend-x4uo.onrender.com";
 
   // Store the logged-in user's ID
   static int? currentUserId;
@@ -70,26 +70,6 @@ class ApiService {
       return [];
     }
   }
-
-  // static Future<bool> sendMessage(int roomId, int userId, String content) async {
-  //   final response = await http.post(
-  //     Uri.parse('$baseUrl/send-message'),
-  //     headers: {"Content-Type": "application/json"},
-  //     body: jsonEncode({
-  //       "room_id": roomId,
-  //       "user_id": userId,
-  //       "content": content,
-  //     }),
-  //   );
-  //
-  //   if (response.statusCode == 200) {
-  //     print("✅ Message sent successfully");
-  //     return true;
-  //   } else {
-  //     print("❌ Failed to send message: ${jsonDecode(response.body)['detail']}");
-  //     return false;
-  //   }
-  // }
 
   // Function to hash OTP before sending
   static String hashOTP(String otp) {
@@ -169,6 +149,9 @@ class ApiService {
 
   static Future<Map<String, dynamic>?> verifyOTP(String email,
       String otp) async {
+
+    final prefs = await SharedPreferences.getInstance();
+
     final response = await http.post(
       Uri.parse('$baseUrl/verify-otp'),
       headers: {"Content-Type": "application/json"},
@@ -180,9 +163,12 @@ class ApiService {
 
       if (responseData.containsKey("current_user_id")) {
         int userId = responseData["current_user_id"];
-
         // ✅ Save User ID
         await ApiService.saveUserId(userId);
+      }
+      if (responseData.containsKey("username")) {
+        String username = responseData["username"];
+        await prefs.setString("username", username); // ✅ Store username
       }
 
       return responseData;
@@ -251,7 +237,7 @@ class ApiService {
   }
 
   // websocket functionalities
-  static const String webSocketBaseUrl = "ws://tr8lhmndjg.ap.loclx.io";
+  static const String webSocketBaseUrl = "ws://chatapp-backend-x4uo.onrender.com";
   static WebSocketChannel? _channel;
 
   static void connectToChat(int roomId, int userId, Function(dynamic) onMessageReceived) {
